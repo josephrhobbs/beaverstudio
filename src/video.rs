@@ -61,6 +61,7 @@ impl Video {
 
 #[test]
 fn render_empty_video() {
+    // Create an empty video
     let video = Video::new(
         (1920, 1080),
         [0, 0, 0],
@@ -68,5 +69,6 @@ fn render_empty_video() {
         2.0,
     );
 
+    // Render the video
     video.render();
 }
