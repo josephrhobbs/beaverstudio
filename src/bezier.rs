@@ -1,6 +1,14 @@
 //! Bezier curve implementation.
 
-use crate::Vector;
+use image::{
+    Rgb,
+    RgbImage,
+};
+
+use crate::{
+    Artist,
+    Vector,
+};
 
 /// Compute the binomial coefficient C(n,k).
 fn binom(mut n: u32, k: u32) -> u32 {
@@ -32,8 +40,8 @@ impl Bezier {
         }
     }
 
-    /// Draw this Bezier curve.
-    pub fn draw(&self, t: f64) -> Vector {
+    /// Trace this Bezier curve.
+    pub fn trace(&self, t: f64) -> Vector {
         // Zero vector
         let mut result = Vector::zero();
 
@@ -55,5 +63,17 @@ impl Bezier {
         }
 
         result
+    }
+}
+
+impl Artist for Bezier {
+    fn draw(&self, image: &mut RgbImage) {
+        let mut t = 0.0;
+
+        while t <= 1.0 {
+            let (x, y) = self.trace(t).to_pixels(1920, 1080);
+            image.put_pixel(x, y, Rgb([255, 255, 255]));
+            t += 0.0001;
+        }
     }
 }

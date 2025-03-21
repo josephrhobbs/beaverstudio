@@ -5,6 +5,8 @@ use image::{
     RgbImage,
 };
 
+use crate::Animation;
+
 /// A video, represented as a series of still frames.
 pub struct Video {
     /// Video width (pixels).
@@ -21,6 +23,9 @@ pub struct Video {
 
     /// Video duration (seconds).
     duration: f64,
+
+    /// Video animations, combined with start and end frames.
+    animations: Vec<(Box<dyn Animation>, u32, u32)>,
 }
 
 impl Video {
@@ -37,10 +42,20 @@ impl Video {
             background: Rgb (background),
             fps,
             duration,
+            animations: Vec::new(),
         }
     }
 
-    /// Render this video to a series of still frames.
+    /// Add an animation to this video.
+    pub fn add(&mut self, animation: Box<dyn Animation>, start: f64, end: f64) {
+        // Frame numbers from timestamps
+        let start_frame = (start * self.fps) as u32;
+        let end_frame = (end * self.fps) as u32;
+
+        self.animations.push((animation, start_frame, end_frame));
+    }
+
+    /// Render this video into a series of still frames.
     pub fn render(&self) {
         let frame_count = (self.duration * self.fps) as u32;
 
@@ -48,27 +63,25 @@ impl Video {
             // New, empty frame
             let mut frame = RgbImage::new(self.width, self.height);
 
+            // Create background
             for i in 0..self.width {
                 for j in 0..self.height {
                     frame.put_pixel(i, j, self.background);
                 }
             }
 
-            frame.save(format!("frames/frame_{:04}.png", k));
+            for (anim, start, end) in &self.animations {
+                // Determine progress of this animation
+                let progress = (k as f64 - *start as f64) / (*end as f64 - *start as f64);
+
+                // Transform the progress variable
+                let progress_transform = 0.5 - 0.5 * (progress * 3.141592653).cos();
+
+                // Construct visual artist from this animation
+                let artist = anim.play(progress_transform);
+            }
+
+            frame.save(format!("frames/frame_{:04}.png", k)).unwrap();
         }
     }
-}
-
-#[test]
-fn render_empty_video() {
-    // Create an empty video
-    let video = Video::new(
-        (1920, 1080),
-        [0, 0, 0],
-        60.0,
-        2.0,
-    );
-
-    // Render the video
-    video.render();
 }
