@@ -5,6 +5,8 @@ use image::{
     RgbImage,
 };
 
+use pyo3::prelude::*;
+
 use crate::{
     Artist,
     Vector,
@@ -26,27 +28,36 @@ fn binom(mut n: u32, k: u32) -> u32 {
     output
 }
 
+#[pyclass]
 #[derive(Clone)]
 /// A Bezier curve of arbitrary order, constructed with a series of control points.
 pub struct Bezier {
     /// Origin.
     origin: Vector,
 
+    /// Color (RGB).
+    pub color: Rgb<u8>,
+
     /// Control points, relative to the origin.
     points: Vec<Vector>,
 }
 
+#[pymethods]
 impl Bezier {
+    #[new]
     /// Construct a new Bezier curve, given control points and an origin.
     /// 
     /// Note that the control points are *relative* to the given origin.
-    pub fn new(points: Vec<Vector>, origin: Vector) -> Self {
+    pub fn new(points: Vec<Vector>, origin: Vector, color: [u8; 3]) -> Self {
         Self {
             points,
             origin,
+            color: Rgb (color),
         }
     }
+}
 
+impl Bezier {
     /// Trace this Bezier curve.
     pub fn trace(&self, t: f64) -> Vector {
         // Zero vector
@@ -86,7 +97,7 @@ impl Artist for Bezier {
                 image.width(),
                 image.height(),
             );
-            image.put_pixel(x, y, Rgb([255, 255, 255]));
+            image.put_pixel(x, y, self.color);
 
             // Step along the curve
             t += 0.0001;

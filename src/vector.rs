@@ -6,6 +6,9 @@ use std::ops::{
     Mul,
 };
 
+use pyo3::prelude::*;
+
+#[pyclass]
 #[derive(Clone, Copy)]
 /// A 2-dimensional vector on an image.
 /// 
@@ -16,7 +19,9 @@ pub struct Vector {
     pub y: f64,
 }
 
+#[pymethods]
 impl Vector {
+    #[new]
     /// Construct a new vector.
     pub fn new(x: f64, y: f64) -> Self {
         Self {
@@ -25,6 +30,7 @@ impl Vector {
         }
     }
 
+    #[staticmethod]
     /// Construct the zero vector.
     pub fn zero() -> Self {
         Self {
@@ -32,7 +38,9 @@ impl Vector {
             y: 0.0,
         }
     }
+}
 
+impl Vector {
     /// Convert this vector into pixel values.
     pub fn to_pixels(&self, width: u32, height: u32) -> (u32, u32) {
         let x = (self.x + (width as f64)/2.0) as u32;
