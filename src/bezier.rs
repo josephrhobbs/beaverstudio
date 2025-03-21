@@ -26,17 +26,24 @@ fn binom(mut n: u32, k: u32) -> u32 {
     output
 }
 
-/// A generalized Bezier curve, constructed with a series of control points.
+#[derive(Clone)]
+/// A Bezier curve of arbitrary order, constructed with a series of control points.
 pub struct Bezier {
-    /// Control points.
+    /// Origin.
+    origin: Vector,
+
+    /// Control points, relative to the origin.
     points: Vec<Vector>,
 }
 
 impl Bezier {
-    /// Construct a new Bezier curve.
-    pub fn new(points: Vec<Vector>) -> Self {
+    /// Construct a new Bezier curve, given control points and an origin.
+    /// 
+    /// Note that the control points are *relative* to the given origin.
+    pub fn new(points: Vec<Vector>, origin: Vector) -> Self {
         Self {
             points,
+            origin,
         }
     }
 
@@ -59,7 +66,7 @@ impl Bezier {
             let coeff = binom(order as u32, k as u32);
 
             // Add contribution
-            result = result + self.points[k] * coeff * (1.0 - t).powi((order - k) as i32) * t.powi(k as i32);
+            result = result + (self.points[k] + self.origin) * coeff * (1.0 - t).powi((order - k) as i32) * t.powi(k as i32);
         }
 
         result
@@ -67,12 +74,21 @@ impl Bezier {
 }
 
 impl Artist for Bezier {
-    fn draw(&self, image: &mut RgbImage) {
+    fn draw(&self, location: Vector, image: &mut RgbImage) {
         let mut t = 0.0;
 
         while t <= 1.0 {
-            let (x, y) = self.trace(t).to_pixels(1920, 1080);
+            // Calculate offset from location
+            let trace = self.trace(t) + location;
+
+            // Convert to pixels
+            let (x, y) = trace.to_pixels(
+                image.width(),
+                image.height(),
+            );
             image.put_pixel(x, y, Rgb([255, 255, 255]));
+
+            // Step along the curve
             t += 0.0001;
         }
     }

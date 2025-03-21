@@ -5,7 +5,13 @@ use image::{
     RgbImage,
 };
 
-use crate::Animation;
+use crate::{
+    Animation,
+    Vector,
+};
+
+/// Type alias for an animation with its location and start/stop frames.
+type Instance = (Box<dyn Animation>, Vector, u32, u32);
 
 /// A video, represented as a series of still frames.
 pub struct Video {
@@ -25,7 +31,7 @@ pub struct Video {
     duration: f64,
 
     /// Video animations, combined with start and end frames.
-    animations: Vec<(Box<dyn Animation>, u32, u32)>,
+    animations: Vec<Instance>,
 }
 
 impl Video {
@@ -47,12 +53,12 @@ impl Video {
     }
 
     /// Add an animation to this video.
-    pub fn add(&mut self, animation: Box<dyn Animation>, start: f64, end: f64) {
+    pub fn add(&mut self, animation: Box<dyn Animation>, location: Vector, start: f64, end: f64) {
         // Frame numbers from timestamps
         let start_frame = (start * self.fps) as u32;
         let end_frame = (end * self.fps) as u32;
 
-        self.animations.push((animation, start_frame, end_frame));
+        self.animations.push((animation, location, start_frame, end_frame));
     }
 
     /// Render this video into a series of still frames.
@@ -70,15 +76,20 @@ impl Video {
                 }
             }
 
-            for (anim, start, end) in &self.animations {
+            for (anim, location, start, end) in &self.animations {
                 // Determine progress of this animation
                 let progress = (k as f64 - *start as f64) / (*end as f64 - *start as f64);
 
-                // Transform the progress variable
-                let progress_transform = 0.5 - 0.5 * (progress * 3.141592653).cos();
+                if 0.0 <= progress && progress <= 1.0 {
+                    // Transform the progress variable
+                    let progress_transform = 0.5 - 0.5 * (progress * 3.141592653).cos();
 
-                // Construct visual artist from this animation
-                let artist = anim.play(progress_transform);
+                    // Construct visual artist from this animation
+                    let artist = anim.play(progress_transform);
+
+                    // Draw on this frame
+                    artist.draw(*location, &mut frame);
+                }
             }
 
             frame.save(format!("frames/frame_{:04}.png", k)).unwrap();
