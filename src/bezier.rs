@@ -8,6 +8,8 @@ use image::{
 use pyo3::prelude::*;
 
 use crate::{
+    Animate,
+    Animation,
     Artist,
     Shape,
     Vector,
@@ -62,6 +64,12 @@ impl Bezier {
     pub fn get_shape(&self) -> Shape {
         Shape::new(vec![self.clone()], Vector::zero())
     }
+
+    #[getter]
+    /// Construct an animation from this curve.
+    pub fn get_animate(&self) -> Animation {
+        Animate::animate(self)
+    }
 }
 
 impl Bezier {
@@ -109,5 +117,15 @@ impl Artist for Bezier {
             // Step along the curve
             t += 0.0001;
         }
+    }
+}
+
+impl Animate for Bezier {
+    fn play(&self, _: f64) -> Box<dyn Artist> {
+        Box::new(self.clone())
+    }
+
+    fn clone_box(&self) -> Box<dyn Animate> {
+        Box::new(self.clone())
     }
 }

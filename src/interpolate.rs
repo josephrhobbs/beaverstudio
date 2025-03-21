@@ -5,17 +5,13 @@ use image::{
     RgbImage,
 };
 
-use pyo3::prelude::*;
-
 use crate::{
     Animate,
-    Animation,
     Artist,
     Shape,
     Vector,
 };
 
-#[pyclass]
 #[derive(Clone)]
 /// An interpolation animation, where one shape smoothly becomes another.
 pub struct Interpolate {
@@ -23,21 +19,13 @@ pub struct Interpolate {
     two: Shape,
 }
 
-#[pymethods]
 impl Interpolate {
-    #[new]
     /// Construct a new interpolation.
     pub fn new(one: Shape, two: Shape) -> Self {
         Self {
             one,
             two,
         }
-    }
-
-    #[getter]
-    /// Construct an animation from this interpolation.
-    pub fn get_animate(&self) -> Animation {
-        Animate::animate(self)
     }
 }
 

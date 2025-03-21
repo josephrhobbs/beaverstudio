@@ -31,7 +31,6 @@ use video::Video;
 fn beaverstudio(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add classes
     m.add_class::<Bezier>()?;
-    m.add_class::<Interpolate>()?;
     m.add_class::<Rectangle>()?;
     m.add_class::<Shape>()?;
     m.add_class::<Vector>()?;

@@ -8,8 +8,11 @@ use image::{
 use pyo3::prelude::*;
 
 use crate::{
+    Animate,
+    Animation,
     Artist,
     Bezier,
+    Interpolate,
     Vector,
 };
 
@@ -38,6 +41,17 @@ impl Shape {
             curves,
         }
     }
+
+    #[getter]
+    /// Construct an animation from this shape.
+    pub fn get_animate(&self) -> Animation {
+        Animate::animate(self)
+    }
+
+    /// Interpolate this shape with another.
+    pub fn into(&self, other: Shape) -> Animation {
+        Interpolate::new(self.clone(), other).animate()
+    }
 }
 
 impl Shape {
@@ -63,5 +77,15 @@ impl Artist for Shape {
         for curve in &self.curves {
             curve.draw(location, image);
         }
+    }
+}
+
+impl Animate for Shape {
+    fn play(&self, _: f64) -> Box<dyn Artist> {
+        Box::new(self.clone())
+    }
+
+    fn clone_box(&self) -> Box<dyn Animate> {
+        Box::new(self.clone())
     }
 }
