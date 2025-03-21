@@ -4,12 +4,13 @@ use std::ops::{
     Add,
     Sub,
     Mul,
+    Neg,
 };
 
 use pyo3::prelude::*;
 
 #[pyclass]
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 /// A 2-dimensional vector on an image.
 /// 
 /// The origin of an image is in the center, and
@@ -90,6 +91,17 @@ impl Mul<u32> for Vector {
         Self {
             x: self.x * (other as f64),
             y: self.y * (other as f64),
+        }
+    }
+}
+
+impl Neg for Vector {
+    type Output = Vector;
+
+    fn neg(self) -> Self::Output {
+        Self {
+            x: -self.x,
+            y: -self.y,
         }
     }
 }

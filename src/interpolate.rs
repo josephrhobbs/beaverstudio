@@ -11,31 +11,32 @@ use crate::{
     Animate,
     Animation,
     Artist,
-    Bezier,
+    Shape,
     Vector,
 };
 
 #[pyclass]
 #[derive(Clone)]
-/// An interpolation animation, where one Bezier curve smoothly becomes another.
+/// An interpolation animation, where one shape smoothly becomes another.
 pub struct Interpolate {
-    one: Bezier,
-    two: Bezier,
+    one: Shape,
+    two: Shape,
 }
 
 #[pymethods]
 impl Interpolate {
     #[new]
     /// Construct a new interpolation.
-    pub fn new(one: Bezier, two: Bezier) -> Self {
+    pub fn new(one: Shape, two: Shape) -> Self {
         Self {
             one,
             two,
         }
     }
 
+    #[getter]
     /// Construct an animation from this interpolation.
-    pub fn animate(&self) -> Animation {
+    pub fn get_animate(&self) -> Animation {
         Animate::animate(self)
     }
 }
@@ -50,16 +51,16 @@ impl Animate for Interpolate {
     }
 }
 
-/// A linear interpolation between two Bezier curves.
+/// A linear interpolation between two shapes.
 pub struct InterpolatedCurve {
-    one: Bezier,
-    two: Bezier,
+    one: Shape,
+    two: Shape,
     progress: f64,
 }
 
 impl InterpolatedCurve {
     /// Construct a new interpolated curve.
-    pub fn new(one: Bezier, two: Bezier, progress: f64) -> Self {
+    pub fn new(one: Shape, two: Shape, progress: f64) -> Self {
         Self {
             one,
             two,

@@ -9,6 +9,7 @@ use pyo3::prelude::*;
 
 use crate::{
     Artist,
+    Shape,
     Vector,
 };
 
@@ -54,6 +55,12 @@ impl Bezier {
             origin,
             color: Rgb (color),
         }
+    }
+
+    #[getter]
+    /// Turn this Bezier curve into a shape.
+    pub fn get_shape(&self) -> Shape {
+        Shape::new(vec![self.clone()], Vector::zero())
     }
 }
 
