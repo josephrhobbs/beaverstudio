@@ -7,6 +7,7 @@ pub struct Brush {
 }
 
 impl Brush {
+    /// Construct a circular brush based on a given thickness.
     pub fn new(thickness: i32) -> Self {
         // Curve "brush"
         let mut points = Vec::new();

@@ -47,6 +47,7 @@ impl Vector {
         let x = (self.x + (width as f64)/2.0).round() as u32;
         let y = ((height as f64)/2.0 - self.y).round() as u32;
         
+        // TODO don't even draw the pixel if it's off-screen
         (x.clamp(0, width-1), y.clamp(0, height-1))
     }
 }
