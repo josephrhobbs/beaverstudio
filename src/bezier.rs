@@ -12,6 +12,7 @@ use crate::{
     Animation,
     Artist,
     Shape,
+    Trace,
     Vector,
 };
 
@@ -66,9 +67,15 @@ impl Bezier {
     }
 
     #[getter]
-    /// Construct an animation from this curve.
-    pub fn get_animate(&self) -> Animation {
+    /// Construct a (static) animation from this curve.
+    pub fn get_display(&self) -> Animation {
         Animate::animate(self)
+    }
+
+    #[getter]
+    /// Construct a tracing animation from this curve.
+    pub fn get_trace(&self) -> Animation {
+        Trace::new(self.get_shape()).animate()
     }
 }
 

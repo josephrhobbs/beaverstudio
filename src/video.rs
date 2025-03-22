@@ -75,8 +75,9 @@ impl Video {
         self.animations.push((animation, location, start_frame, end_frame));
     }
 
-    /// Render this video into a series of still frames.
+    /// Render this video from a series of still frames.
     pub fn render(&self) {
+        // How many frames?
         let frame_count = (self.duration * self.fps) as u32;
 
         for k in (0..frame_count).progress() {

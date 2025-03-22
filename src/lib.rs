@@ -9,6 +9,7 @@ mod bezier;
 mod shape;
 mod interpolate;
 mod rectangle;
+mod trace;
 mod vector;
 mod video;
 
@@ -23,6 +24,7 @@ use bezier::Bezier;
 use interpolate::Interpolate;
 use rectangle::Rectangle;
 use shape::Shape;
+use trace::Trace;
 use vector::Vector;
 use video::Video;
 

@@ -13,6 +13,7 @@ use crate::{
     Artist,
     Bezier,
     Interpolate,
+    Trace,
     Vector,
 };
 
@@ -43,14 +44,20 @@ impl Shape {
     }
 
     #[getter]
-    /// Construct an animation from this shape.
-    pub fn get_animate(&self) -> Animation {
+    /// Construct a (static) animation from this shape.
+    pub fn get_display(&self) -> Animation {
         Animate::animate(self)
     }
 
     /// Interpolate this shape with another.
     pub fn into(&self, other: Shape) -> Animation {
         Interpolate::new(self.clone(), other).animate()
+    }
+
+    #[getter]
+    /// Construct a tracing animation from this shape.
+    pub fn get_trace(&self) -> Animation {
+        Trace::new(self.clone()).animate()
     }
 }
 
@@ -75,7 +82,7 @@ impl Shape {
 impl Artist for Shape {
     fn draw(&self, location: Vector, image: &mut RgbImage) {
         for curve in &self.curves {
-            curve.draw(location, image);
+            curve.draw(self.origin + location, image);
         }
     }
 }
