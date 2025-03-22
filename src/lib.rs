@@ -6,6 +6,8 @@
 mod animation;
 mod artist;
 mod bezier;
+mod bresenham;
+mod brush;
 mod shape;
 mod interpolate;
 mod rectangle;
@@ -21,6 +23,8 @@ use animation::{
 };
 use artist::Artist;
 use bezier::Bezier;
+use bresenham::Bresenham;
+use brush::Brush;
 use interpolate::Interpolate;
 use rectangle::Rectangle;
 use shape::Shape;

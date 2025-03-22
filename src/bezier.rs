@@ -11,10 +11,15 @@ use crate::{
     Animate,
     Animation,
     Artist,
+    Bresenham,
+    Brush,
     Shape,
     Trace,
     Vector,
 };
+
+/// Step along Bezier curve during render.
+pub const STEP: f64 = 0.001;
 
 /// Compute the binomial coefficient C(n,k).
 fn binom(mut n: u32, k: u32) -> u32 {
@@ -44,6 +49,12 @@ pub struct Bezier {
 
     /// Control points, relative to the origin.
     points: Vec<Vector>,
+
+    /// Curve thickness.
+    pub thickness: i32,
+
+    /// Curve brush.
+    brush: Brush,
 }
 
 #[pymethods]
@@ -52,11 +63,13 @@ impl Bezier {
     /// Construct a new Bezier curve, given control points and an origin.
     /// 
     /// Note that the control points are *relative* to the given origin.
-    pub fn new(points: Vec<Vector>, origin: Vector, color: [u8; 3]) -> Self {
+    pub fn new(points: Vec<Vector>, origin: Vector, color: [u8; 3], thickness: i32) -> Self {
         Self {
             points,
             origin,
             color: Rgb (color),
+            thickness,
+            brush: Brush::new(thickness),
         }
     }
 
@@ -108,21 +121,37 @@ impl Bezier {
 
 impl Artist for Bezier {
     fn draw(&self, location: Vector, image: &mut RgbImage) {
+        // Build collection of points to interpolate between
         let mut t = 0.0;
+        let mut points = Vec::new();
 
         while t <= 1.0 {
-            // Calculate offset from location
-            let trace = self.trace(t) + location;
-
-            // Convert to pixels
-            let (x, y) = trace.to_pixels(
-                image.width(),
-                image.height(),
-            );
-            image.put_pixel(x, y, self.color);
-
             // Step along the curve
-            t += 0.0001;
+            t += STEP;
+
+            // Save this point
+            points.push(location + self.trace(t));
+        }
+
+        // Interpolation (Bresenham's line algorithm)
+        for i in 0..(points.len() - 1) {
+            // Two points to draw between
+            let this_point = points[i];
+            let next_point = points[i + 1];
+
+            // Convert points to integers
+            let (x0, y0) = this_point.to_pixels(image.width(), image.height());
+            let (x1, y1) = next_point.to_pixels(image.width(), image.height());
+
+            // Construct Bresenham line
+            let line = Bresenham::new(x0, y0, x1, y1).points;
+
+            // Draw first point
+            for (x, y) in line {
+                for (i, j) in &self.brush.points {
+                    image.put_pixel((x as i32 + i) as u32, (y as i32 + j) as u32, self.color);
+                }
+            }
         }
     }
 }

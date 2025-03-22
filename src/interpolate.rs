@@ -8,9 +8,14 @@ use image::{
 use crate::{
     Animate,
     Artist,
+    Bresenham,
+    Brush,
     Shape,
     Vector,
 };
+
+/// Interpolation step size.
+pub const STEP: f64 = 0.001;
 
 #[derive(Clone)]
 /// An interpolation animation, where one shape smoothly becomes another.
@@ -59,7 +64,9 @@ impl InterpolatedCurve {
 
 impl Artist for InterpolatedCurve {
     fn draw(&self, location: Vector, image: &mut RgbImage) {
+        // Build collection of points to interpolate between
         let mut t = 0.0;
+        let mut points = Vec::new();
 
         while t <= 1.0 {
             // Calculate offset from location
@@ -69,23 +76,47 @@ impl Artist for InterpolatedCurve {
             // Compute weighted average
             let trace = trace1 * (1.0 - self.progress) + trace2 * self.progress;
 
-            // Interpolate colors
-            // TODO this is a sloppy interpolation, can it be better?
-            let (r, g, b): (f64, f64, f64) = (
-                (self.one.color.0[0] as f64) * (1.0 - self.progress) + (self.two.color.0[0] as f64) * self.progress,
-                (self.one.color.0[1] as f64) * (1.0 - self.progress) + (self.two.color.0[1] as f64) * self.progress,
-                (self.one.color.0[2] as f64) * (1.0 - self.progress) + (self.two.color.0[2] as f64) * self.progress,
-            );
-
-            // Convert to pixels
-            let (x, y) = trace.to_pixels(
-                image.width(),
-                image.height(),
-            );
-            image.put_pixel(x, y, Rgb([r as u8, g as u8, b as u8]));
+            // Save this point
+            points.push(location + trace);
 
             // Step along the curve
-            t += 0.0001;
+            t += STEP;
+        }
+
+        // Interpolate colors
+        // TODO this is a sloppy interpolation, can it be better?
+        let (r, g, b): (f64, f64, f64) = (
+            (self.one.color.0[0] as f64) * (1.0 - self.progress) + (self.two.color.0[0] as f64) * self.progress,
+            (self.one.color.0[1] as f64) * (1.0 - self.progress) + (self.two.color.0[1] as f64) * self.progress,
+            (self.one.color.0[2] as f64) * (1.0 - self.progress) + (self.two.color.0[2] as f64) * self.progress,
+        );
+        let color = Rgb ([r as u8, g as u8, b as u8]);
+
+        // Thickness of this interpolation
+        let thickness = (self.one.thickness as f64) * (1.0 - self.progress) + (self.two.thickness as f64) * self.progress;
+
+        // Brush to draw with
+        let brush = Brush::new(thickness.round() as i32);
+
+        // Interpolation (Bresenham's line algorithm)
+        for i in 0..(points.len() - 1) {
+            // Two points to draw between
+            let this_point = points[i];
+            let next_point = points[i + 1];
+
+            // Convert points to integers
+            let (x0, y0) = this_point.to_pixels(image.width(), image.height());
+            let (x1, y1) = next_point.to_pixels(image.width(), image.height());
+
+            // Construct Bresenham line
+            let line = Bresenham::new(x0, y0, x1, y1).points;
+
+            // Draw first point
+            for (x, y) in line {
+                for (i, j) in &brush.points {
+                    image.put_pixel((x as i32 + i) as u32, (y as i32 + j) as u32, color);
+                }
+            }
         }
     }
 }

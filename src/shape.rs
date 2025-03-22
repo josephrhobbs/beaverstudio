@@ -23,6 +23,9 @@ use crate::{
 pub struct Shape {
     /// Curves contained in this shape.
     curves: Vec<Bezier>,
+
+    /// Thickness of this shape.
+    pub thickness: i32,
     
     /// Origin of this shape.
     origin: Vector,
@@ -38,6 +41,7 @@ impl Shape {
     pub fn new(curves: Vec<Bezier>, origin: Vector) -> Self {
         Self {
             color: curves[0].color,
+            thickness: curves[0].thickness,
             origin,
             curves,
         }
@@ -75,7 +79,7 @@ impl Shape {
         // Progress along this curve
         let t_curve = (t * self.curves.len() as f64).fract();
 
-        self.curves[idx].trace(t_curve) + self.origin
+        self.origin + self.curves[idx].trace(t_curve)
     }
 }
 

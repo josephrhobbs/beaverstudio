@@ -44,8 +44,8 @@ impl Vector {
 impl Vector {
     /// Convert this vector into pixel values.
     pub fn to_pixels(&self, width: u32, height: u32) -> (u32, u32) {
-        let x = (self.x + (width as f64)/2.0) as u32;
-        let y = ((height as f64)/2.0 - self.y) as u32;
+        let x = (self.x + (width as f64)/2.0).round() as u32;
+        let y = ((height as f64)/2.0 - self.y).round() as u32;
         
         (x.clamp(0, width-1), y.clamp(0, height-1))
     }

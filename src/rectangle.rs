@@ -21,16 +21,16 @@ pub struct Rectangle (Shape);
 impl Rectangle {
     #[new]
     /// Construct a new rectangle.
-    pub fn new(center: Vector, width: f64, height: f64, color: [u8; 3]) -> Self {
+    pub fn new(center: Vector, width: f64, height: f64, color: [u8; 3], thickness: i32) -> Self {
         // Half-sides
         let xside = Vector::new(0.5*width, 0.0);
         let yside = Vector::new(0.0, 0.5*height);
 
         Self (Shape::new(vec![
-            Bezier::new(vec![-xside + yside, xside + yside], Vector::zero(), color),
-            Bezier::new(vec![xside + yside, xside - yside], Vector::zero(), color),
-            Bezier::new(vec![xside - yside, -xside - yside], Vector::zero(), color),
-            Bezier::new(vec![-xside - yside, -xside + yside], Vector::zero(), color),
+            Bezier::new(vec![-xside + yside, xside + yside], Vector::zero(), color, thickness),
+            Bezier::new(vec![xside + yside, xside - yside], Vector::zero(), color, thickness),
+            Bezier::new(vec![xside - yside, -xside - yside], Vector::zero(), color, thickness),
+            Bezier::new(vec![-xside - yside, -xside + yside], Vector::zero(), color, thickness),
         ], center))
     }
 
