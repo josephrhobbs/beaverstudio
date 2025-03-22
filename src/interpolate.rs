@@ -11,11 +11,9 @@ use crate::{
     Bresenham,
     Brush,
     Shape,
+    STEP,
     Vector,
 };
-
-/// Interpolation step size.
-pub const STEP: f64 = 0.001;
 
 #[derive(Clone)]
 /// An interpolation animation, where one shape smoothly becomes another.

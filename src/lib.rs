@@ -32,6 +32,9 @@ use trace::Trace;
 use vector::Vector;
 use video::Video;
 
+/// Interpolation step size.
+pub const STEP: f64 = 0.001;
+
 /// Python interface for Beaver Studio.
 #[pymodule]
 fn beaverstudio(m: &Bound<'_, PyModule>) -> PyResult<()> {

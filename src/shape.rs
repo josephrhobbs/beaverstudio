@@ -74,7 +74,13 @@ impl Shape {
         }
 
         // Which curve are we on?
-        let idx = (t * self.curves.len() as f64).trunc() as usize;
+        let mut idx = (t * self.curves.len() as f64).trunc() as usize;
+
+        // Constrain the index (floating point instabilities affect this sometimes)
+        // TODO this feels silly and there's probably a better solution
+        if idx == self.curves.len() {
+            idx = self.curves.len() - 1;
+        }
 
         // Progress along this curve
         let t_curve = (t * self.curves.len() as f64).fract();

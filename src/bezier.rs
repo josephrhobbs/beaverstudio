@@ -14,12 +14,10 @@ use crate::{
     Bresenham,
     Brush,
     Shape,
+    STEP,
     Trace,
     Vector,
 };
-
-/// Step along Bezier curve during render.
-pub const STEP: f64 = 0.001;
 
 /// Compute the binomial coefficient C(n,k).
 fn binom(mut n: u32, k: u32) -> u32 {

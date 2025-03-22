@@ -5,7 +5,10 @@ use image::RgbImage;
 use crate::{
     Artist,
     Animate,
+    Bresenham,
+    Brush,
     Shape,
+    STEP,
     Vector,
 };
 
@@ -56,21 +59,40 @@ impl TracedShape {
 
 impl Artist for TracedShape {
     fn draw(&self, location: Vector, image: &mut RgbImage) {
+        // Build collection of points to interpolate between
         let mut t = 0.0;
+        let mut points = Vec::new();
 
         while t <= self.progress {
-            // Calculate offset from location
-            let trace = self.shape.trace(t) + location;
-
-            // Convert to pixels
-            let (x, y) = trace.to_pixels(
-                image.width(),
-                image.height(),
-            );
-            image.put_pixel(x, y, self.shape.color);
-
             // Step along the curve
-            t += 0.0001;
+            t += STEP;
+
+            // Save this point
+            points.push(location + self.shape.trace(t));
+        }
+
+        // Brush to draw with
+        let brush = Brush::new(self.shape.thickness);
+
+        // Interpolation (Bresenham's line algorithm)
+        for i in 0..(points.len() - 1) {
+            // Two points to draw between
+            let this_point = points[i];
+            let next_point = points[i + 1];
+
+            // Convert points to integers
+            let (x0, y0) = this_point.to_pixels(image.width(), image.height());
+            let (x1, y1) = next_point.to_pixels(image.width(), image.height());
+
+            // Construct Bresenham line
+            let line = Bresenham::new(x0, y0, x1, y1).points;
+
+            // Draw first point
+            for (x, y) in line {
+                for (i, j) in &brush.points {
+                    image.put_pixel((x as i32 + i) as u32, (y as i32 + j) as u32, self.shape.color);
+                }
+            }
         }
     }
 }
