@@ -35,7 +35,7 @@ impl Rectangle {
     }
 
     #[getter]
-    /// Extract the chain of bezier curves.
+    /// Extract the chain of Bezier curves.
     pub fn get_shape(&self) -> Shape {
         self.0.clone()
     }
