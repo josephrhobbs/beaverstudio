@@ -17,6 +17,11 @@ mod video;
 
 use pyo3::prelude::*;
 
+use image::{
+    Rgb,
+    RgbImage,
+};
+
 use animation::{
     Animation,
     Animate,
@@ -34,6 +39,21 @@ use video::Video;
 
 /// Interpolation step size.
 pub const STEP: f64 = 0.001;
+
+/// Add a pixel to the image with a given strength.
+pub fn add_pixel(image: &mut RgbImage, x: u32, y: u32, color: Rgb<u8>, strength: f64) {
+    // Current pixel
+    let current_pixel = image.get_pixel(x, y);
+
+    // Interpolated pixel
+    let new_pixel = Rgb ([
+        ((color[0] as f64) * strength) as u8 + ((current_pixel[0] as f64) * (1.0 - strength)) as u8,
+        ((color[1] as f64) * strength) as u8 + ((current_pixel[1] as f64) * (1.0 - strength)) as u8,
+        ((color[2] as f64) * strength) as u8 + ((current_pixel[2] as f64) * (1.0 - strength)) as u8,
+    ]);
+
+    image.put_pixel(x, y, new_pixel);
+}
 
 /// Python interface for Beaver Studio.
 #[pymodule]

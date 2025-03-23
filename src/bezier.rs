@@ -8,6 +8,7 @@ use image::{
 use pyo3::prelude::*;
 
 use crate::{
+    add_pixel,
     Animate,
     Animation,
     Artist,
@@ -146,8 +147,8 @@ impl Artist for Bezier {
 
             // Draw first point
             for (x, y) in line {
-                for (i, j) in &self.brush.points {
-                    image.put_pixel((x as i32 + i) as u32, (y as i32 + j) as u32, self.color);
+                for (i, j, strength) in &self.brush.points {
+                    add_pixel(image, (x as i32 + i) as u32, (y as i32 + j) as u32, self.color, *strength);
                 }
             }
         }

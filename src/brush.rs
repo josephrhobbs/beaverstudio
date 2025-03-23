@@ -3,7 +3,7 @@
 #[derive(Clone)]
 /// A brush that draws a line or curve.
 pub struct Brush {
-    pub points: Vec<(i32, i32)>,
+    pub points: Vec<(i32, i32, f64)>,
 }
 
 impl Brush {
@@ -15,8 +15,15 @@ impl Brush {
         // See if points are in brush
         for i in -thickness..thickness {
             for j in -thickness..thickness {
-                if 4 * i.pow(2) + 4 * j.pow(2) <= thickness.pow(2) {
-                    points.push((i, j));
+                let dist = 4 * i.pow(2) + 4 * j.pow(2);
+                if dist <= thickness.pow(2) {
+                    points.push((i, j, 1.0));
+                } else if dist <= (thickness + 2).pow(2) {
+                    points.push((i, j, 0.7));
+                } else if dist <= (thickness + 4).pow(2) {
+                    points.push((i, j, 0.4));
+                } else if dist <= (thickness + 6).pow(2) {
+                    points.push((i, j, 0.1));
                 }
             }
         }

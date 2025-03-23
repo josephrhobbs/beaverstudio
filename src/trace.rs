@@ -3,6 +3,7 @@
 use image::RgbImage;
 
 use crate::{
+    add_pixel,
     Artist,
     Animate,
     Bresenham,
@@ -89,8 +90,8 @@ impl Artist for TracedShape {
 
             // Draw first point
             for (x, y) in line {
-                for (i, j) in &brush.points {
-                    image.put_pixel((x as i32 + i) as u32, (y as i32 + j) as u32, self.shape.color);
+                for (i, j, strength) in &brush.points {
+                    add_pixel(image, (x as i32 + i) as u32, (y as i32 + j) as u32, self.shape.color, *strength);
                 }
             }
         }
