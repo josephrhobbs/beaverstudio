@@ -27,10 +27,10 @@ impl Rectangle {
         let yside = Vector::new(0.0, 0.5*height);
 
         Self (Shape::new(vec![
-            Bezier::new(vec![-xside + yside, xside + yside], Vector::zero(), color, thickness),
-            Bezier::new(vec![xside + yside, xside - yside], Vector::zero(), color, thickness),
-            Bezier::new(vec![xside - yside, -xside - yside], Vector::zero(), color, thickness),
-            Bezier::new(vec![-xside - yside, -xside + yside], Vector::zero(), color, thickness),
+            Bezier::new(vec![xside + yside, -xside + yside], Vector::zero(), color, thickness),
+            Bezier::new(vec![-xside + yside, -xside - yside], Vector::zero(), color, thickness),
+            Bezier::new(vec![-xside - yside, xside - yside], Vector::zero(), color, thickness),
+            Bezier::new(vec![xside - yside, xside + yside], Vector::zero(), color, thickness),
         ], center))
     }
 

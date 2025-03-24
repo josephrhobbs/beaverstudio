@@ -15,7 +15,7 @@ holds information about animations and renders them on screen.  The second is th
 which holds information about animations of 2D geometry.  The third is the `Shape` data structure,
 which holds information about 2D geometries, such as polygons and Bezier curves.
 
-The typical workflow begins with the creation of one or more `Shapes`.  After creating these shapes,
+The typical workflow begins with the creation of one or more `Shape` structures.  After creating these shapes,
 they can be converted into `Animation` structures using interpolations, traces, or simple display.  These
 animations can then be scheduled in the video and rendered on screen.
 

@@ -8,8 +8,10 @@ mod artist;
 mod bezier;
 mod bresenham;
 mod brush;
+mod circle;
 mod shape;
 mod interpolate;
+mod parametric;
 mod polygon;
 mod rectangle;
 mod trace;
@@ -31,8 +33,10 @@ use artist::Artist;
 use bezier::Bezier;
 use bresenham::Bresenham;
 use brush::Brush;
+use circle::Circle;
 use interpolate::Interpolate;
 use rectangle::Rectangle;
+use parametric::Parametric;
 use polygon::Polygon;
 use shape::Shape;
 use trace::Trace;
@@ -40,7 +44,7 @@ use vector::Vector;
 use video::Video;
 
 /// Interpolation step size.
-pub const STEP: f64 = 0.001;
+pub const STEP: f64 = 1E-3;
 
 /// Add a pixel to the image with a given strength.
 pub fn add_pixel(image: &mut RgbImage, x: u32, y: u32, color: Rgb<u8>, strength: f64) {
@@ -62,6 +66,8 @@ pub fn add_pixel(image: &mut RgbImage, x: u32, y: u32, color: Rgb<u8>, strength:
 fn beaverstudio(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add classes
     m.add_class::<Bezier>()?;
+    m.add_class::<Circle>()?;
+    m.add_class::<Parametric>()?;
     m.add_class::<Polygon>()?;
     m.add_class::<Rectangle>()?;
     m.add_class::<Shape>()?;
