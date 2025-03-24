@@ -61,7 +61,13 @@ impl Shape {
     #[getter]
     /// Construct a tracing animation from this shape.
     pub fn get_trace(&self) -> Animation {
-        Trace::new(self.clone()).animate()
+        Trace::new(self.clone(), false).animate()
+    }
+
+    #[getter]
+    /// Construct an untracing animation from this shape.
+    pub fn get_untrace(&self) -> Animation {
+        Trace::new(self.clone(), true).animate()
     }
 }
 

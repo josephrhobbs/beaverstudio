@@ -80,7 +80,13 @@ impl Parametric {
     #[getter]
     /// Construct a tracing animation from this shape.
     pub fn get_trace(&self) -> Animation {
-        TraceParametric::new(self.clone()).animate()
+        TraceParametric::new(self.clone(), false).animate()
+    }
+
+    #[getter]
+    /// Construct an untracing animation from this shape.
+    pub fn get_untrace(&self) -> Animation {
+        TraceParametric::new(self.clone(), true).animate()
     }
 }
 
@@ -124,20 +130,24 @@ impl Animate for Parametric {
 pub struct TraceParametric {
     /// Curve to be traced.
     curve: Parametric,
+
+    /// Are we tracing or untracing?
+    untrace: bool,
 }
 
 impl TraceParametric {
     /// Construct a new tracing animation.
-    pub fn new(curve: Parametric) -> Self {
+    pub fn new(curve: Parametric, untrace: bool) -> Self {
         Self {
             curve,
+            untrace,
         }
     }
 }
 
 impl Animate for TraceParametric {
     fn play(&self, progress: f64) -> Box<dyn Artist> {
-        Box::new(TracedParametric::new(self.curve.clone(), progress))
+        Box::new(TracedParametric::new(self.curve.clone(), progress, self.untrace))
     }
 
     fn clone_box(&self) -> Box<dyn Animate> {
@@ -152,14 +162,18 @@ pub struct TracedParametric {
 
     /// Amount of progress this tracing has made.
     progress: f64,
+
+    /// Are we tracing or untracing?
+    untrace: bool,
 }
 
 impl TracedParametric {
     /// Construct a new curve to be traced.
-    pub fn new(curve: Parametric, progress: f64) -> Self {
+    pub fn new(curve: Parametric, progress: f64, untrace: bool) -> Self {
         Self {
             curve,
             progress,
+            untrace,
         }
     }
 }
@@ -179,16 +193,24 @@ impl Artist for TracedParametric {
             // Construct Bresenham line
             let line = Bresenham::new(x0, y0, x1, y1).points;
 
-            // Draw first point
+            // Are we past the bounds?
+            if self.untrace {
+                // Before the progress point, skip
+                if self.curve.points[i].1 < self.progress {
+                    continue;
+                }
+            } else {
+                // Past the progress point, stop drawing
+                if self.curve.points[i + 1].1 > self.progress {
+                    break;
+                }
+            }
+
+            // Draw points
             for (x, y) in line {
                 for (i, j, strength) in &self.curve.brush.points {
                     add_pixel(image, (x as i32 + i) as u32, (y as i32 + j) as u32, self.curve.color, *strength);
                 }
-            }
-
-            // Are we past the end?
-            if self.curve.points[i + 1].1 > self.progress {
-                break;
             }
         }
     }

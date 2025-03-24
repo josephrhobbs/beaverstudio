@@ -87,7 +87,13 @@ impl Bezier {
     #[getter]
     /// Construct a tracing animation from this curve.
     pub fn get_trace(&self) -> Animation {
-        Trace::new(self.get_shape()).animate()
+        Trace::new(self.get_shape(), false).animate()
+    }
+
+    #[getter]
+    /// Construct an untracing animation from this curve.
+    pub fn get_untrace(&self) -> Animation {
+        Trace::new(self.get_shape(), true).animate()
     }
 }
 

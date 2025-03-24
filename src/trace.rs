@@ -18,20 +18,24 @@ use crate::{
 pub struct Trace {
     /// Shape to be traced.
     shape: Shape,
+
+    /// Are we tracing or untracing?
+    untrace: bool,
 }
 
 impl Trace {
     /// Construct a new tracing animation.
-    pub fn new(shape: Shape) -> Self {
+    pub fn new(shape: Shape, untrace: bool) -> Self {
         Self {
             shape,
+            untrace,
         }
     }
 }
 
 impl Animate for Trace {
     fn play(&self, progress: f64) -> Box<dyn Artist> {
-        Box::new(TracedShape::new(self.shape.clone(), progress))
+        Box::new(TracedShape::new(self.shape.clone(), progress, self.untrace))
     }
 
     fn clone_box(&self) -> Box<dyn Animate> {
@@ -46,14 +50,18 @@ pub struct TracedShape {
 
     /// Amount of progress this tracing has made.
     progress: f64,
+
+    /// Are we tracing or untracing?
+    untrace: bool,
 }
 
 impl TracedShape {
     /// Construct a new shape to be traced.
-    pub fn new(shape: Shape, progress: f64) -> Self {
+    pub fn new(shape: Shape, progress: f64, untrace: bool) -> Self {
         Self {
             shape,
             progress,
+            untrace,
         }
     }
 }
@@ -65,22 +73,19 @@ impl Artist for TracedShape {
 
         for (i, curve) in self.shape.curves.iter().enumerate() {
             // How much progress along this curve?
-            let progress = if self.progress < i as f64 * progress_per_curve {
-                0.0
-            } else if self.progress > (i + 1) as f64 * progress_per_curve {
-                1.0
-            } else {
-                (self.progress - i as f64 * progress_per_curve) / progress_per_curve
-            };
+            let progress = ((self.progress - i as f64 * progress_per_curve) / progress_per_curve).clamp(0.0, 1.0);
 
             // Build collection of points to interpolate between
-            let mut t = 0.0;
+            let mut t = if self.untrace { progress } else { 0.0 };
             let mut points = Vec::new();
 
-            while t <= progress {
+            // Condition to finish tracing on this frame
+            let condition = |t: f64| if self.untrace { t < 1.0 } else { t <= progress };
+
+            while condition(t) {
                 // Step along the curve
                 t += STEP;
-
+                
                 // Fix floating-point errors
                 let t_fixed = t.clamp(0.0, 1.0 - STEP);
 
@@ -90,6 +95,11 @@ impl Artist for TracedShape {
 
             // Brush to draw with
             let brush = Brush::new(self.shape.thickness);
+
+            // If there are no points, don't draw anything
+            if points.len() == 0 {
+                continue;
+            }
 
             // Interpolation (Bresenham's line algorithm)
             for i in 0..(points.len() - 1) {
