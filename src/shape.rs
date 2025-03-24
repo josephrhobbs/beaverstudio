@@ -22,13 +22,13 @@ use crate::{
 /// A shape made from Bezier curves.
 pub struct Shape {
     /// Curves contained in this shape.
-    curves: Vec<Bezier>,
+    pub curves: Vec<Bezier>,
 
     /// Thickness of this shape.
     pub thickness: i32,
     
     /// Origin of this shape.
-    origin: Vector,
+    pub origin: Vector,
 
     /// Color of this shape.
     pub color: Rgb<u8>,

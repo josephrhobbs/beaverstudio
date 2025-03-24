@@ -1,11 +1,16 @@
 //! A video.
 
+use std::f64::consts::PI;
+
 use image::{
     Rgb,
     RgbImage,
 };
 
-use indicatif::ProgressIterator;
+use indicatif::{
+    ProgressBar,
+    ProgressStyle,
+};
 
 use pyo3::prelude::*;
 
@@ -80,7 +85,15 @@ impl Video {
         // How many frames?
         let frame_count = (self.duration * self.fps) as u32;
 
-        for k in (0..frame_count).progress() {
+        // Progress bar style
+        let style = ProgressStyle::with_template(
+            "[{elapsed_precise}] {wide_bar} {pos:>7}/{len:7} frames [ETA {eta_precise}]"
+        ).unwrap();
+
+        // Progress bar, for user
+        let bar = ProgressBar::new(frame_count as u64).with_style(style);
+
+        for k in 0..frame_count {
             // New, empty frame
             let mut frame = RgbImage::new(self.width, self.height);
 
@@ -96,8 +109,8 @@ impl Video {
                 let progress = (k as f64 - *start as f64) / (*end as f64 - *start as f64);
 
                 if 0.0 <= progress && progress <= 1.0 {
-                    // Transform the progress variable
-                    let progress_transform = 0.5 - 0.5 * (progress * 3.141592653).cos();
+                    // Transform the progress variable to create smooth transitions
+                    let progress_transform = 0.5 - 0.5 * (progress * PI).cos();
 
                     // Construct visual artist from this animation
                     let artist = animation.0.play(progress_transform);
@@ -108,6 +121,11 @@ impl Video {
             }
 
             frame.save(format!("{}/frame_{:04}.png", location, k)).unwrap();
+
+            // Increment progress bar
+            bar.inc(1);
         }
+
+        bar.finish();
     }
 }

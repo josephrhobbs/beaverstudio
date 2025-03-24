@@ -60,41 +60,55 @@ impl TracedShape {
 
 impl Artist for TracedShape {
     fn draw(&self, location: Vector, image: &mut RgbImage) {
-        // Build collection of points to interpolate between
-        let mut t = 0.0;
-        let mut points = Vec::new();
+        // Amount of progress per curve
+        let progress_per_curve = 1.0 / (self.shape.curves.len() as f64);
 
-        while t <= self.progress {
-            // Step along the curve
-            t += STEP;
+        for (i, curve) in self.shape.curves.iter().enumerate() {
+            // How much progress along this curve?
+            let progress = if self.progress < i as f64 * progress_per_curve {
+                0.0
+            } else if self.progress > (i + 1) as f64 * progress_per_curve {
+                1.0
+            } else {
+                (self.progress - i as f64 * progress_per_curve) / progress_per_curve
+            };
 
-            // Fix floating-point errors
-            let t_fixed = t.clamp(0.0, 1.0 - STEP);
+            // Build collection of points to interpolate between
+            let mut t = 0.0;
+            let mut points = Vec::new();
 
-            // Save this point
-            points.push(location + self.shape.trace(t_fixed));
-        }
+            while t <= progress {
+                // Step along the curve
+                t += STEP;
 
-        // Brush to draw with
-        let brush = Brush::new(self.shape.thickness);
+                // Fix floating-point errors
+                let t_fixed = t.clamp(0.0, 1.0 - STEP);
 
-        // Interpolation (Bresenham's line algorithm)
-        for i in 0..(points.len() - 1) {
-            // Two points to draw between
-            let this_point = points[i];
-            let next_point = points[i + 1];
+                // Save this point
+                points.push(location + self.shape.origin + curve.trace(t_fixed));
+            }
 
-            // Convert points to integers
-            let (x0, y0) = this_point.to_pixels(image.width(), image.height());
-            let (x1, y1) = next_point.to_pixels(image.width(), image.height());
+            // Brush to draw with
+            let brush = Brush::new(self.shape.thickness);
 
-            // Construct Bresenham line
-            let line = Bresenham::new(x0, y0, x1, y1).points;
+            // Interpolation (Bresenham's line algorithm)
+            for i in 0..(points.len() - 1) {
+                // Two points to draw between
+                let this_point = points[i];
+                let next_point = points[i + 1];
 
-            // Draw first point
-            for (x, y) in line {
-                for (i, j, strength) in &brush.points {
-                    add_pixel(image, (x as i32 + i) as u32, (y as i32 + j) as u32, self.shape.color, *strength);
+                // Convert points to integers
+                let (x0, y0) = this_point.to_pixels(image.width(), image.height());
+                let (x1, y1) = next_point.to_pixels(image.width(), image.height());
+
+                // Construct Bresenham line
+                let line = Bresenham::new(x0, y0, x1, y1).points;
+
+                // Draw first point
+                for (x, y) in line {
+                    for (i, j, strength) in &brush.points {
+                        add_pixel(image, (x as i32 + i) as u32, (y as i32 + j) as u32, self.shape.color, *strength);
+                    }
                 }
             }
         }
