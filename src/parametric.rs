@@ -18,7 +18,6 @@ use crate::{
     Bresenham,
     Brush,
     STEP,
-    // Trace,
     Vector,
 };
 
@@ -49,17 +48,20 @@ impl Parametric {
             // Step along the curve
             t += STEP;
 
+            // Fix floating-point errors
+            let t_fixed = t.clamp(0.0, 1.0 - STEP);
+
             // Get X and Y position
             let pos = Python::with_gil(|py| {
                 // TODO this is sloppy
-                let x: f64 = x_func.call(py, (t,), None).unwrap().extract(py).unwrap();
-                let y: f64 = y_func.call(py, (t,), None).unwrap().extract(py).unwrap();
+                let x: f64 = x_func.call(py, (t_fixed,), None).unwrap().extract(py).unwrap();
+                let y: f64 = y_func.call(py, (t_fixed,), None).unwrap().extract(py).unwrap();
 
                 Vector::new(x, y)
             });
 
             // Save this point
-            points.push((origin + pos, t));
+            points.push((origin + pos, t_fixed));
         }
 
         Self {

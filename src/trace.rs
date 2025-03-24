@@ -68,8 +68,11 @@ impl Artist for TracedShape {
             // Step along the curve
             t += STEP;
 
+            // Fix floating-point errors
+            let t_fixed = t.clamp(0.0, 1.0 - STEP);
+
             // Save this point
-            points.push(location + self.shape.trace(t));
+            points.push(location + self.shape.trace(t_fixed));
         }
 
         // Brush to draw with

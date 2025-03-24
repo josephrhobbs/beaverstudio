@@ -64,13 +64,16 @@ impl InterpolatedCurve {
 impl Artist for InterpolatedCurve {
     fn draw(&self, location: Vector, image: &mut RgbImage) {
         // Build collection of points to interpolate between
-        let mut t = 0.0;
+        let mut t = 0.0f64;
         let mut points = Vec::new();
 
         while t <= 1.0 {
+            // Fix floating-point errors
+            let t_fixed = t.clamp(0.0, 1.0 - STEP);
+
             // Calculate offset from location
-            let trace1 = self.one.trace(t) + location;
-            let trace2 = self.two.trace(t) + location;
+            let trace1 = self.one.trace(t_fixed) + location;
+            let trace2 = self.two.trace(t_fixed) + location;
 
             // Compute weighted average
             let trace = trace1 * (1.0 - self.progress) + trace2 * self.progress;
