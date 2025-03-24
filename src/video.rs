@@ -76,7 +76,7 @@ impl Video {
     }
 
     /// Render this video from a series of still frames.
-    pub fn render(&self) {
+    pub fn render(&self, location: String) {
         // How many frames?
         let frame_count = (self.duration * self.fps) as u32;
 
@@ -107,7 +107,7 @@ impl Video {
                 }
             }
 
-            frame.save(format!("frames/frame_{:04}.png", k)).unwrap();
+            frame.save(format!("{}/frame_{:04}.png", location, k)).unwrap();
         }
     }
 }
