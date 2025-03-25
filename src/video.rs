@@ -19,8 +19,14 @@ use pyo3::prelude::*;
 
 use crate::{
     Animation,
+    LinearAxes,
+    Parametric,
+    Shape,
     Vector,
 };
+
+/// Time required to trace an object (seconds).
+pub const TRACE_TIME: f64 = 1.0;
 
 /// Type alias for an animation with its location and start/stop frames.
 type Instance = (Animation, Vector, u32, u32);
@@ -83,6 +89,51 @@ impl Video {
         self.animations.push((animation, location, start_frame, end_frame));
     }
 
+    /// Trace and untrace a shape on this video.
+    /// 
+    /// Note that `start` and `end` are given in seconds.  These are converted into
+    /// frame numbers based on the FPS of the video.  For `Video::trace_untrace`, these
+    /// must be at least 2 seconds apart.
+    pub fn add_shape(&mut self, shape: Shape, location: Vector, start: f64, end: f64) {
+        if end - start < 2.0 {
+            return;
+        }
+
+        self.add(shape.get_trace(), location, start, start + TRACE_TIME);
+        self.add(shape.get_display(), location, start + TRACE_TIME, end - TRACE_TIME);
+        self.add(shape.get_untrace(), location, end - TRACE_TIME, end);
+    }
+
+    /// Trace and untrace a parametric on this video.
+    /// 
+    /// Note that `start` and `end` are given in seconds.  These are converted into
+    /// frame numbers based on the FPS of the video.  For `Video::trace_untrace`, these
+    /// must be at least 2 seconds apart.
+    pub fn add_parametric(&mut self, parametric: Parametric, location: Vector, start: f64, end: f64) {
+        if end - start < 2.0 {
+            return;
+        }
+
+        self.add(parametric.get_trace(), location, start, start + TRACE_TIME);
+        self.add(parametric.get_display(), location, start + TRACE_TIME, end - TRACE_TIME);
+        self.add(parametric.get_untrace(), location, end - TRACE_TIME, end);
+    }
+
+    /// Trace and untrace linear axes on this video.
+    /// 
+    /// Note that `start` and `end` are given in seconds.  These are converted into
+    /// frame numbers based on the FPS of the video.  For `Video::trace_untrace`, these
+    /// must be at least 2 seconds apart.
+    pub fn add_axes(&mut self, linear_axes: LinearAxes, location: Vector, start: f64, end: f64) {
+        if end - start < 2.0 {
+            return;
+        }
+
+        self.add(linear_axes.get_trace(), location, start, start + TRACE_TIME);
+        self.add(linear_axes.get_display(), location, start + TRACE_TIME, end - TRACE_TIME);
+        self.add(linear_axes.get_untrace(), location, end - TRACE_TIME, end);
+    }
+
     /// Render this video from a series of still frames.
     pub fn render(&self, output_dir: String) {
         // How many frames?
@@ -93,7 +144,8 @@ impl Video {
             "[{elapsed_precise}] {wide_bar} {pos:>7}/{len:7} frames [ETA {eta_precise}]"
         ).unwrap();
 
-        // Create output directory
+        // Clear/create output directory
+        fs::remove_dir_all(&output_dir).unwrap();
         fs::create_dir_all(&output_dir).unwrap();
 
         // Progress bar, for user
