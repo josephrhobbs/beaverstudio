@@ -39,23 +39,23 @@ pub struct Parametric {
 impl Parametric {
     #[new]
     /// Construct a new parametric function.
-    pub fn new(x_func: Py<PyFunction>, y_func: Py<PyFunction>, origin: Vector, color: [u8; 3], thickness: i32) -> Self {
+    pub fn new(x_func: Py<PyFunction>, y_func: Py<PyFunction>, times: (f64, f64), origin: Vector, color: [u8; 3], thickness: i32) -> Self {
         // Build collection of points to interpolate between
-        let mut t = 0.0;
+        let mut t = times.0;
         let mut points = Vec::new();
 
-        while t <= 1.0 {
+        while t <= times.1 {
             // Step along the curve
             t += STEP;
 
-            // Fix floating-point errors
-            let t_fixed = t.clamp(0.0, 1.0 - STEP);
+            // Scale to between 0 and 1
+            let t_fixed = (t - times.0) / (times.1 - times.0);
 
             // Get X and Y position
             let pos = Python::with_gil(|py| {
                 // TODO this is sloppy
-                let x: f64 = x_func.call(py, (t_fixed,), None).unwrap().extract(py).unwrap();
-                let y: f64 = y_func.call(py, (t_fixed,), None).unwrap().extract(py).unwrap();
+                let x: f64 = x_func.call(py, (t,), None).unwrap().extract(py).unwrap();
+                let y: f64 = y_func.call(py, (t,), None).unwrap().extract(py).unwrap();
 
                 Vector::new(x, y)
             });

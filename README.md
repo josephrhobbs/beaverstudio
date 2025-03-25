@@ -117,7 +117,7 @@ poly1 = Polygon(
     [vertex1, vertex2, vertex3, vertex4],   # vertices
     Vector.zero(),                          # offset
     [255, 0, 255],                          # color
-    12,                                     # line thickness
+    12,                                     # line thickness (pixels)
 )
 ```
 
@@ -129,13 +129,13 @@ s4 = poly1.shape
 
 #### Building Coordinate Axes
 
-Coordinate axes do not require the `Shape` class.  Currently, only linear-linear axes are supported.  To create
+Coordinate axes do not use the `Shape` class.  Currently, only linear-linear axes are supported.  To create
 linear axes, specify an origin location, a grid spacing, and minor gridline counts left and right of the Y axis
 and above and below the X axis, respectively.
 
 ```python
 axes = LinearAxes(
-    Vector.zero(),  # origin location
+    Vector.zero(),  # origin location (pixels)
     100,            # grid spacing
     (8, 8),         # minor gridlines left and right of Y axis
     (5, 5),         # minor gridlines above and below X axis
@@ -146,6 +146,24 @@ Coordinate axes can be traced, displayed, and untraced directly.
 
 ```python
 axes_anim = axes.trace
+```
+
+#### Building Parametric Curves
+
+Parametric curves, like coordinate axes, do not use the `Shape` class.  To create a parametric curve, specify
+two functions of time for the X and Y positions, as well as time bounds, an offset, a color, and a thickness.
+Note that the result of the X and Y positions are in pixels.  If using this with coordinate axes, ensure that
+this is consistent with the axes' grid spacing, for best results.
+
+```python
+para1 = Parametric(
+    lambda t: 100*t,            # X position
+    lambda t: 100*sin(100*t),   # Y position
+    (-3.14, 3.14),              # time bounds (min, max)
+    Vector.zero(),              # offset (pixels)
+    [255, 0, 0],                # color (RGB)
+    4,                          # line thickness (pixels)
+)
 ```
 
 ### Creating Animations
