@@ -22,6 +22,7 @@ use drawing::{
     Brush,
     Interpolate,
     Trace,
+    TracedShape,
 };
 use geometry::{
     Bezier,

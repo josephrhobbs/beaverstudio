@@ -1,10 +1,15 @@
 //! Coordinate axes.
 
 use crate::{
+    Animate,
+    Animation,
+    Artist,
     Bezier,
-    Shape,
+    TracedShape,
     Vector,
 };
+
+use image::RgbImage;
 
 use pyo3::prelude::*;
 
@@ -20,10 +25,25 @@ const MAJOR_THICKNESS: i32 = 4;
 /// Thickness for minor gridlines.
 const MINOR_THICKNESS: i32 = 2;
 
+/// Progress multiplier for each successive minor gridline (smaller is denser).
+const MULT: f64 = 0.25;
+
 #[pyclass]
 #[derive(Clone)]
 /// Linear-linear coordinate axes.
-pub struct LinearAxes (Shape);
+pub struct LinearAxes {
+    /// Bezier curves describing the X gridlines.
+    pub x_minors: Vec<Bezier>,
+
+    /// Bezier curves describing the Y gridlines.
+    pub y_minors: Vec<Bezier>,
+
+    /// X major gridline.
+    pub x_major: Bezier,
+
+    /// Y major gridline.
+    pub y_major: Bezier,
+}
 
 #[pymethods]
 impl LinearAxes {
@@ -57,6 +77,9 @@ impl LinearAxes {
             x_min = x_min.min(x);
         }
 
+        // Sort X values away from origin
+        x_vals.sort_by(|a, b| (a - origin.x).abs().partial_cmp(&(b - origin.y).abs()).unwrap());
+
         // Current Y value
         let mut y = origin.y;
 
@@ -78,8 +101,12 @@ impl LinearAxes {
             y_min = y_min.min(y);
         }
 
+        // Sort Y values away from origin
+        y_vals.sort_by(|a, b| (a - origin.x).abs().partial_cmp(&(b - origin.y).abs()).unwrap());
+
         // Resultant Bezier curves
-        let mut curves = Vec::new();
+        let mut x_minors = Vec::new();
+        let mut y_minors = Vec::new();
 
         // Construct Bezier curves for each X minor gridline
         for x_val in x_vals {
@@ -90,7 +117,7 @@ impl LinearAxes {
                 MINOR_THICKNESS,
             );
 
-            curves.push(gridline);
+            x_minors.push(gridline);
         }
 
         // Construct Bezier curves for each Y minor gridline
@@ -102,7 +129,7 @@ impl LinearAxes {
                 MINOR_THICKNESS,
             );
 
-            curves.push(gridline);
+            y_minors.push(gridline);
         }
 
         // Construct major gridlines
@@ -118,15 +145,151 @@ impl LinearAxes {
             MAJOR_COLOR,
             MAJOR_THICKNESS,
         );
-        curves.push(x_major);
-        curves.push(y_major);
 
-        Self (Shape::new(curves, Vector::zero()))
+        Self {
+            x_minors,
+            y_minors,
+            x_major,
+            y_major,
+        }
     }
 
     #[getter]
-    /// Extract the chain of Bezier curves.
-    pub fn get_shape(&self) -> Shape {
-        self.0.clone()
+    /// Display these axes on screen.
+    pub fn get_display(&self) -> Animation {
+        Animate::animate(self)
+    }
+
+    #[getter]
+    /// Construct a tracing animation.
+    pub fn get_trace(&self) -> Animation {
+        TraceLinearAxes::new(self.clone(), false).animate()
+    }
+
+    #[getter]
+    /// Construct an untracing animation.
+    pub fn get_untrace(&self) -> Animation {
+        TraceLinearAxes::new(self.clone(), true).animate()
+    }
+}
+
+impl Artist for LinearAxes {
+    fn draw(&self, location: Vector, image: &mut RgbImage) {
+        // Render X minor gridlines
+        for curve in &self.x_minors {
+            curve.draw(location, image);
+        }
+
+        // Render Y minor gridlines
+        for curve in &self.y_minors {
+            curve.draw(location, image);
+        }
+
+        // Render major gridlines
+        self.x_major.draw(location, image);
+        self.y_major.draw(location, image);
+    }
+}
+
+impl Animate for LinearAxes {
+    fn play(&self, _: f64) -> Box<dyn Artist> {
+        Box::new(self.clone())
+    }
+
+    fn clone_box(&self) -> Box<dyn Animate> {
+        Box::new(self.clone())
+    }
+}
+
+#[derive(Clone)]
+/// An animation that traces linear axes over time.
+pub struct TraceLinearAxes {
+    /// Linear axes to trace.
+    linear_axes: LinearAxes,
+
+    /// Are we tracing or untracing?
+    untrace: bool,
+}
+
+impl TraceLinearAxes {
+    /// Construct a new animation for linear axes.
+    pub fn new(linear_axes: LinearAxes, untrace: bool) -> Self {
+        Self {
+            linear_axes,
+            untrace,
+        }
+    }
+}
+
+impl Animate for TraceLinearAxes {
+    fn play(&self, progress: f64) -> Box<dyn Artist> {
+        Box::new(TracedLinearAxes::new(self.linear_axes.clone(), progress, self.untrace))
+    }
+
+    fn clone_box(&self) -> Box<dyn Animate> {
+        Box::new(self.clone())
+    }
+}
+
+/// A partially traced set of linear axes.
+pub struct TracedLinearAxes {
+    /// Linear axes to trace.
+    linear_axes: LinearAxes,
+
+    /// Amount of progress we've made.
+    progress: f64,
+
+    /// Are we tracing or untracing?
+    untrace: bool,
+}
+
+impl TracedLinearAxes {
+    /// Construct a new partially traced set of linear axes.
+    pub fn new(linear_axes: LinearAxes, progress: f64, untrace: bool) -> Self {
+        Self {
+            linear_axes,
+            progress,
+            untrace,
+        }
+    }
+}
+
+impl Artist for TracedLinearAxes {
+    fn draw(&self, location: Vector, image: &mut RgbImage) {
+        // X minor gridlines
+        for (i, x_minor) in self.linear_axes.x_minors.iter().enumerate() {
+            let x_minor = TracedShape::new(
+                x_minor.get_shape(),
+                self.progress.powf(i as f64 * MULT + (1.0 + MULT)),
+                self.untrace,
+            );
+            x_minor.draw(location, image);
+        }
+
+        // Y minor gridlines
+        for (j, y_minor) in self.linear_axes.y_minors.iter().enumerate() {
+            let y_minor = TracedShape::new(
+                y_minor.get_shape(),
+                self.progress.powf(j as f64 * MULT + (1.0 + MULT)),
+                self.untrace,
+            );
+            y_minor.draw(location, image);
+        }
+
+        // X major gridline
+        let x_major = TracedShape::new(
+            self.linear_axes.x_major.get_shape(),
+            self.progress,
+            self.untrace,
+        );
+        x_major.draw(location, image);
+
+        // Y major gridline
+        let y_major = TracedShape::new(
+            self.linear_axes.y_major.get_shape(),
+            self.progress,
+            self.untrace,
+        );
+        y_major.draw(location, image);
     }
 }

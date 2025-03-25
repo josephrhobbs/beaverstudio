@@ -15,4 +15,7 @@ pub use artist::Artist;
 pub use bresenham::Bresenham;
 pub use brush::Brush;
 pub use interpolate::Interpolate;
-pub use trace::Trace;
+pub use trace::{
+    Trace,
+    TracedShape,
+};
