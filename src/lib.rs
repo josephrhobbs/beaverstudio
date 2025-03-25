@@ -41,6 +41,11 @@ pub const STEP: f64 = 1E-3;
 
 /// Add a pixel to the image with a given strength.
 pub fn add_pixel(image: &mut RgbImage, x: u32, y: u32, color: Rgb<u8>, strength: f64) {
+    // Don't draw outside the image
+    if x >= image.width() || y >= image.height() {
+        return;
+    }
+
     // Current pixel
     let current_pixel = image.get_pixel(x, y);
 
