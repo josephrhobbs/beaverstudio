@@ -26,6 +26,7 @@ use drawing::{
 use geometry::{
     Bezier,
     Circle,
+    LinearAxes,
     Parametric,
     Polygon,
     Rectangle,
@@ -58,6 +59,7 @@ fn beaverstudio(m: &Bound<'_, PyModule>) -> PyResult<()> {
     // Add classes
     m.add_class::<Bezier>()?;
     m.add_class::<Circle>()?;
+    m.add_class::<LinearAxes>()?;
     m.add_class::<Parametric>()?;
     m.add_class::<Polygon>()?;
     m.add_class::<Rectangle>()?;
