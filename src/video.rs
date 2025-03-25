@@ -1,6 +1,9 @@
 //! A video.
 
-use std::f64::consts::PI;
+use std::{
+    f64::consts::PI,
+    fs,
+};
 
 use image::{
     Rgb,
@@ -81,7 +84,7 @@ impl Video {
     }
 
     /// Render this video from a series of still frames.
-    pub fn render(&self, location: String) {
+    pub fn render(&self, output_dir: String) {
         // How many frames?
         let frame_count = (self.duration * self.fps) as u32;
 
@@ -89,6 +92,9 @@ impl Video {
         let style = ProgressStyle::with_template(
             "[{elapsed_precise}] {wide_bar} {pos:>7}/{len:7} frames [ETA {eta_precise}]"
         ).unwrap();
+
+        // Create output directory
+        fs::create_dir_all(&output_dir).unwrap();
 
         // Progress bar, for user
         let bar = ProgressBar::new(frame_count as u64).with_style(style);
@@ -120,7 +126,7 @@ impl Video {
                 }
             }
 
-            frame.save(format!("{}/frame_{:04}.png", location, k)).unwrap();
+            frame.save(format!("{}/frame_{:04}.png", output_dir, k)).unwrap();
 
             // Increment progress bar
             bar.inc(1);

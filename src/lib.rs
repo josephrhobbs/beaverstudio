@@ -3,19 +3,8 @@
 #![deny(warnings)]
 #![deny(missing_docs)]
 
-mod animation;
-mod artist;
-mod bezier;
-mod bresenham;
-mod brush;
-mod circle;
-mod shape;
-mod interpolate;
-mod parametric;
-mod polygon;
-mod rectangle;
-mod trace;
-mod vector;
+mod drawing;
+mod geometry;
 mod video;
 
 use pyo3::prelude::*;
@@ -25,22 +14,24 @@ use image::{
     RgbImage,
 };
 
-use animation::{
-    Animation,
+use drawing::{
     Animate,
+    Animation,
+    Artist,
+    Bresenham,
+    Brush,
+    Interpolate,
+    Trace,
 };
-use artist::Artist;
-use bezier::Bezier;
-use bresenham::Bresenham;
-use brush::Brush;
-use circle::Circle;
-use interpolate::Interpolate;
-use rectangle::Rectangle;
-use parametric::Parametric;
-use polygon::Polygon;
-use shape::Shape;
-use trace::Trace;
-use vector::Vector;
+use geometry::{
+    Bezier,
+    Circle,
+    Parametric,
+    Polygon,
+    Rectangle,
+    Shape,
+    Vector,
+};
 use video::Video;
 
 /// Interpolation step size.
