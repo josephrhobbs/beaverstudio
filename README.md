@@ -51,7 +51,7 @@ p1 = Vector(-10, 10)
 
 ### Creating Geometry
 
-All geometry is animated by means of `Shape` objects.  Shapes can be constructed manually, or by creating
+Nearly all geometry is animated by means of `Shape` objects.  Shapes can be constructed manually, or by creating
 polygons or curves and converting them.
 
 #### Building Bezier Curves
@@ -127,6 +127,27 @@ Polygons can be converted into `Shape` objects by the `.shape` attribute.
 s4 = poly1.shape
 ```
 
+#### Building Coordinate Axes
+
+Coordinate axes do not require the `Shape` class.  Currently, only linear-linear axes are supported.  To create
+linear axes, specify an origin location, a grid spacing, and minor gridline counts left and right of the Y axis
+and above and below the X axis, respectively.
+
+```python
+axes = LinearAxes(
+    Vector.zero(),  # origin location
+    100,            # grid spacing
+    (8, 8),         # minor gridlines left and right of Y axis
+    (5, 5),         # minor gridlines above and below X axis
+)
+```
+
+Coordinate axes can be traced, displayed, and untraced directly.
+
+```python
+axes_anim = axes.trace
+```
+
 ### Creating Animations
 
 Once `Shape` objects have been created, they need to be converted into `Animation` objects before they can be
@@ -154,6 +175,12 @@ You can trace out a shape, creating a real-time drawing effect, by the `.trace` 
 
 ```python
 anim3 = shape.trace
+```
+
+You can also "untrace" the shape, creating a real-time erasing effect, by the `.untrace` attribute.
+
+```python
+anim4 = shape.untrace
 ```
 
 ### Adding Animations to the Video
