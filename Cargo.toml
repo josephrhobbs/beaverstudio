@@ -1,5 +1,7 @@
 [package]
 name = "beaverstudio"
+description = "An open-source 2D graphics engine for creating animated videos.  Powered by Rust."
+license = "MIT"
 version = "0.1.0"
 edition = "2021"
 
