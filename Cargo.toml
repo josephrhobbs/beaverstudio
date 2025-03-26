@@ -12,3 +12,4 @@ crate-type = ["cdylib"]
 image = "0.25.5"
 indicatif = "0.17.11"
 pyo3 = "0.23.3"
+rayon = "1.10.0"

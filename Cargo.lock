@@ -79,6 +79,7 @@ dependencies = [
  "image",
  "indicatif",
  "pyo3",
+ "rayon",
 ]
 
 [[package]]

@@ -17,6 +17,11 @@ use indicatif::{
 
 use pyo3::prelude::*;
 
+use rayon::{
+    prelude::*,
+    ThreadPoolBuilder,
+};
+
 use crate::{
     Animation,
     LinearAxes,
@@ -104,6 +109,16 @@ impl Video {
         self.add(shape.get_untrace(), location, end - TRACE_TIME, end);
     }
 
+    /// Create a "flow" effect according to a parametric curve.
+    /// 
+    /// Note that `start` and `end` are given in seconds.  These are converted into
+    /// frame numbers based on the FPS of the video.  For `Video::trace_untrace`, these
+    /// must be at least 2 seconds apart.
+    pub fn flow(&mut self, parametric: Parametric, location: Vector, start: f64) {
+        self.add(parametric.get_trace(), location, start, start + TRACE_TIME*0.5);
+        self.add(parametric.get_untrace(), location, start + TRACE_TIME*0.5, start + TRACE_TIME);
+    }
+
     /// Trace and untrace a parametric on this video.
     /// 
     /// Note that `start` and `end` are given in seconds.  These are converted into
@@ -134,8 +149,9 @@ impl Video {
         self.add(linear_axes.get_untrace(), location, end - TRACE_TIME, end);
     }
 
+    #[pyo3(signature=(output_dir, threads=1))]
     /// Render this video from a series of still frames.
-    pub fn render(&self, output_dir: String) {
+    pub fn render(&self, output_dir: String, threads: usize) {
         // How many frames?
         let frame_count = (self.duration * self.fps) as u32;
 
@@ -151,7 +167,11 @@ impl Video {
         // Progress bar, for user
         let bar = ProgressBar::new(frame_count as u64).with_style(style);
 
-        for k in 0..frame_count {
+        // Create thread pool
+        ThreadPoolBuilder::new().num_threads(threads).build_global().unwrap();
+
+        // Render in parallel
+        (0..frame_count).into_par_iter().for_each(|k| {
             // New, empty frame
             let mut frame = RgbImage::new(self.width, self.height);
 
@@ -182,7 +202,7 @@ impl Video {
 
             // Increment progress bar
             bar.inc(1);
-        }
+        });
 
         bar.finish();
     }
