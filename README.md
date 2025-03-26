@@ -65,7 +65,7 @@ b1 = Bezier(
 )
 ```
 
-#### Manually Constructing Shapes
+#### Building Shapes from Bezier Curves
 
 Shapes can be manually constructed using a series of Bezier curves.  To create a `Shape` manually, specify a list
 of Bezier curves and an offset.
@@ -92,10 +92,25 @@ r1 = Rect(
 )
 ```
 
+#### Building Circles
+
+Circles can be creating using the `Circle` class.  To create a `Circle`, specify a center, radius, color,
+and line thickness.
+
+```python
+c1 = Circle(
+    Vector.zero(),  # center
+    100,            # radius (pixels)
+    [0, 255, 255],  # color (RGB)
+    10,             # line thickness (pixels)
+)
+```
+
 #### Building Closed Polygons
 
 Closed polygons can be created using the `Polygon` class.  To create a `Polygon`, specify a list of vertices
-(in `Vector` form), an offset, a color, and a line thickness.
+(in `Vector` form), an offset, a color, and a line thickness.  Beaver Studio will automatically close the
+polygon by connecting the last and first vertices.
 
 ```python
 poly1 = Polygon(
