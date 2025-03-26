@@ -1,26 +1,23 @@
 //! An arbitrary polygon.
 
-use image::RgbImage;
-
 use pyo3::prelude::*;
 
 use crate::{
-    Artist,
     Bezier,
     Shape,
     Vector,
 };
 
-#[pyclass]
+#[pyclass(extends=Shape)]
 #[derive(Clone)]
 /// A polygon.
-pub struct Polygon (Shape);
+pub struct Polygon;
 
 #[pymethods]
 impl Polygon {
     #[new]
     /// Construct a new polygon.
-    pub fn new(points: Vec<Vector>, center: Vector, color: [u8; 3], thickness: i32) -> Self {
+    pub fn new(points: Vec<Vector>, center: Vector, color: [u8; 3], thickness: i32) -> (Self, Shape) {
         // Bezier curves
         let mut curves = Vec::new();
 
@@ -44,18 +41,8 @@ impl Polygon {
         );
         curves.push(curve);
 
-        Self (Shape::new(curves, center))
-    }
+        let shape = Shape::new(curves, center);
 
-    #[getter]
-    /// Extract the chain of Bezier curves.
-    pub fn get_shape(&self) -> Shape {
-        self.0.clone()
-    }
-}
-
-impl Artist for Polygon {
-    fn draw(&self, location: Vector, image: &mut RgbImage) {
-        self.0.draw(location, image);
+        (Self {}, shape)
     }
 }

@@ -10,13 +10,11 @@ use pyo3::prelude::*;
 use crate::{
     add_pixel,
     Animate,
-    Animation,
     Artist,
     Bresenham,
     Brush,
     Shape,
     STEP,
-    Trace,
     Vector,
 };
 
@@ -36,7 +34,7 @@ fn binom(mut n: u32, k: u32) -> u32 {
     output
 }
 
-#[pyclass]
+#[pyclass(extends=Shape)]
 #[derive(Clone)]
 /// A Bezier curve of arbitrary order, constructed with a series of control points.
 pub struct Bezier {
@@ -62,6 +60,18 @@ impl Bezier {
     /// Construct a new Bezier curve, given control points and an origin.
     /// 
     /// Note that the control points are *relative* to the given origin.
+    pub fn pynew(points: Vec<Vector>, origin: Vector, color: [u8; 3], thickness: i32) -> (Self, Shape) {
+        let curve = Self::new(points, origin, color, thickness);
+        let shape = curve.get_shape();
+
+        (curve, shape)
+    }
+}
+
+impl Bezier {
+    /// Construct a new Bezier curve, given control points and an origin.
+    /// 
+    /// Note that the control points are *relative* to the given origin.
     pub fn new(points: Vec<Vector>, origin: Vector, color: [u8; 3], thickness: i32) -> Self {
         Self {
             points,
@@ -72,32 +82,11 @@ impl Bezier {
         }
     }
 
-    #[getter]
-    /// Turn this Bezier curve into a shape.
+    /// Convert this Bezier curve into a shape.
     pub fn get_shape(&self) -> Shape {
         Shape::new(vec![self.clone()], Vector::zero())
     }
 
-    #[getter]
-    /// Construct a (static) animation from this curve.
-    pub fn get_display(&self) -> Animation {
-        Animate::animate(self)
-    }
-
-    #[getter]
-    /// Construct a tracing animation from this curve.
-    pub fn get_trace(&self) -> Animation {
-        Trace::new(self.get_shape(), false).animate()
-    }
-
-    #[getter]
-    /// Construct an untracing animation from this curve.
-    pub fn get_untrace(&self) -> Animation {
-        Trace::new(self.get_shape(), true).animate()
-    }
-}
-
-impl Bezier {
     /// Trace this Bezier curve.
     pub fn trace(&self, t: f64) -> Vector {
         // Zero vector

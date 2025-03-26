@@ -17,7 +17,7 @@ use crate::{
     Vector,
 };
 
-#[pyclass]
+#[pyclass(subclass)]
 #[derive(Clone)]
 /// A shape made from Bezier curves.
 pub struct Shape {

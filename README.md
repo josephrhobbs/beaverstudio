@@ -51,9 +51,6 @@ p1 = Vector(-10, 10)
 
 ### Creating Geometry
 
-Nearly all geometry is animated by means of `Shape` objects.  Shapes can be constructed manually, or by creating
-polygons or curves and converting them.
-
 #### Building Bezier Curves
 
 Bezier curves may be created using the `Bezier` class.  To create a Bezier curve, specify two or more control
@@ -66,12 +63,6 @@ b1 = Bezier(
     [255, 0, 0],                # color (RGB)
     2,                          # line thickness (pixels)
 )
-```
-
-Bezier curves can be converted into `Shape` objects by the `.shape` attribute.
-
-```python
-s1 = b1.shape
 ```
 
 #### Manually Constructing Shapes
@@ -101,12 +92,6 @@ r1 = Rect(
 )
 ```
 
-Rectangles can be converted into `Shape` objects by the `.shape` attribute.
-
-```python
-s3 = r1.shape
-```
-
 #### Building Closed Polygons
 
 Closed polygons can be created using the `Polygon` class.  To create a `Polygon`, specify a list of vertices
@@ -121,17 +106,10 @@ poly1 = Polygon(
 )
 ```
 
-Polygons can be converted into `Shape` objects by the `.shape` attribute.
-
-```python
-s4 = poly1.shape
-```
-
 #### Building Coordinate Axes
 
-Coordinate axes do not use the `Shape` class.  Currently, only linear-linear axes are supported.  To create
-linear axes, specify an origin location, a grid spacing, and minor gridline counts left and right of the Y axis
-and above and below the X axis, respectively.
+Currently, only linear-linear axes are supported.  To create linear axes, specify an origin location, a grid
+spacing, and minor gridline counts left and right of the Y axis and above and below the X axis, respectively.
 
 ```python
 axes = LinearAxes(
@@ -142,18 +120,11 @@ axes = LinearAxes(
 )
 ```
 
-Coordinate axes can be traced, displayed, and untraced directly.
-
-```python
-axes_anim = axes.trace
-```
-
 #### Building Parametric Curves
 
-Parametric curves, like coordinate axes, do not use the `Shape` class.  To create a parametric curve, specify
-two functions of time for the X and Y positions, as well as time bounds, an offset, a color, and a thickness.
-Note that the result of the X and Y positions are in pixels.  If using this with coordinate axes, ensure that
-this is consistent with the axes' grid spacing, for best results.
+To create a parametric curve, specify two functions of time for the X and Y positions, as well as time bounds,
+an offset, a color, and a thickness. Note that the result of the X and Y positions are in pixels.  If using
+this with coordinate axes, ensure that this is consistent with the axes' grid spacing, for best results.
 
 ```python
 para1 = Parametric(
@@ -168,16 +139,18 @@ para1 = Parametric(
 
 ### Creating Animations
 
-Once `Shape` objects have been created, they need to be converted into `Animation` objects before they can be
+Once geometry objects have been created, they need to be converted into `Animation` objects before they can be
 added to the video.
 
 #### Interpolation
 
-One shape can smoothly become another using the `Shape.into()` method.
+One shape can smoothly become another using the `<geometry>.into()` method.
 
 ```python
 anim1 = shape1.into(shape2)
 ```
+
+Note that this _does not work_ on `Parametric` or `LinearAxis` objects.
 
 #### Display
 
