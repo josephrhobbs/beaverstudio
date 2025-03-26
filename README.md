@@ -150,11 +150,11 @@ One shape can smoothly become another using the `<geometry>.into()` method.
 anim1 = shape1.into(shape2)
 ```
 
-Note that this _does not work_ on `Parametric` or `LinearAxis` objects.
+Note that this _does not work_ with `Parametric` or `LinearAxis` objects.
 
 #### Display
 
-A shape can be simply displayed using the `.display` attribute.
+Geometry can be simply displayed using the `.display` attribute.
 
 ```python
 anim2 = shape.display
@@ -162,13 +162,13 @@ anim2 = shape.display
 
 #### Trace
 
-You can trace out a shape, creating a real-time drawing effect, by the `.trace` attribute.
+You can trace out geometry, creating a real-time drawing effect, by the `.trace` attribute.
 
 ```python
 anim3 = shape.trace
 ```
 
-You can also "untrace" the shape, creating a real-time erasing effect, by the `.untrace` attribute.
+You can also "untrace" geometry, creating a real-time erasing effect, by the `.untrace` attribute.
 
 ```python
 anim4 = shape.untrace
