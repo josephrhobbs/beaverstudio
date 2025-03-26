@@ -78,7 +78,7 @@ impl LinearAxes {
         }
 
         // Sort X values away from origin
-        x_vals.sort_by(|a, b| (a - origin.x).abs().partial_cmp(&(b - origin.y).abs()).unwrap());
+        x_vals.sort_by(|a, b| (a - origin.x).abs().partial_cmp(&(b - origin.x).abs()).unwrap());
 
         // Current Y value
         let mut y = origin.y;
@@ -102,7 +102,7 @@ impl LinearAxes {
         }
 
         // Sort Y values away from origin
-        y_vals.sort_by(|a, b| (a - origin.x).abs().partial_cmp(&(b - origin.y).abs()).unwrap());
+        y_vals.sort_by(|a, b| (a - origin.y).abs().partial_cmp(&(b - origin.y).abs()).unwrap());
 
         // Resultant Bezier curves
         let mut x_minors = Vec::new();
